@@ -10,11 +10,21 @@ class Polynomial:
         self._coeffs = coeffs
         while len(self._coeffs) and self._coeffs[-1] == 0:
             self._coeffs.pop()
+    
+    @staticmethod
+    def xpow(a: float, pow: int) -> Polynomial:
+        """A helper util creating a polynomial a * x^pow."""
+        return Polynomial([0] * pow + [a])
 
     @property
     def coeffs(self):
         """Getter for coeffs."""
         return self._coeffs.copy()
+    
+    @property
+    def degree(self):
+        """Degree of the polynomial."""
+        return max(len(self._coeffs) - 1, 0)
 
     def derivative(self) -> Polynomial:
         """Returns a derivative of self."""
@@ -28,7 +38,42 @@ class Polynomial:
           0)
 
     def __eq__(self, value: object) -> bool:
-        return isinstance(value, Polynomial) and self._coeffs == value.coeffs
+        if isinstance(value, Polynomial) and self._coeffs == value.coeffs:
+            return True
+        # For numeric values:
+        if len(self._coeffs) == 1 and self._coeffs[0] == value:
+            return True
+        if not self._coeffs and value == 0:
+            return True
+        return False
+    
+    def __add__(self, other: Polynomial) -> Polynomial:
+        new_coeffs = [0 for _ in range(max(self.degree, other.degree) + 1)]
+        for i, coeff in enumerate(self.coeffs):
+            new_coeffs[i] += coeff
+        for i, coeff in enumerate(other.coeffs):
+            new_coeffs[i] += coeff
+        # Trimming of leading 0 coefficients will be done by constructor.
+        return Polynomial(new_coeffs)
+
+    def __neg__(self) -> Polynomial:
+        return Polynomial([-c for c in self._coeffs])
+
+    def __sub__(self, other: Polynomial) -> Polynomial:
+        return self + -other
+    
+    def __str__(self) -> str:
+        if not self._coeffs:
+            return "0"
+        s = ""
+        for i, c in enumerate(self._coeffs):
+            if i == 0:
+                s += "%.2f" % c
+            elif i == 1:
+                s += "%.2f * x" % c
+            else:
+                 s += "%.2f * x^%d" % (c, i)
+        return s
 
     def is_linear(self) -> bool:
         """True iff self is a linear polynomial."""
@@ -42,12 +87,17 @@ class Polynomial:
         """True iff self is a linear monic polynomial."""
         return self.is_linear() and self.is_monic()
 
-    def synthetic_division(self) -> Polynomial:
-        """Performs synthetic division of self."""
+    def synthetic_division(self, d: Polynomial) -> Polynomial:
+        """Performs synthetic division of self by `d`."""
         return NotImplementedError()
 
-    def long_division(self) -> Polynomial:
-        """Performs long division of self."""
+    def long_division(self, d: Polynomial) -> Polynomial:
+        """Performs long division of self by `d`."""
+        if d == 0:
+            return ValueError("The divisor must be non zero.")
+        r = self  # Remainder
+        while r.degree >= d.degree:
+            pass
         return NotImplementedError()
 
     def roots(self) -> list[float]:

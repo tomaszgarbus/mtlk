@@ -16,6 +16,10 @@ class TestPolynomials(unittest.TestCase):
         self.assertNotEqual(poly1, poly4)
         self.assertNotEqual(poly1, poly5)
         self.assertEqual(Polynomial([0]), Polynomial([]))
+        self.assertEqual(Polynomial([]), 0)
+        self.assertEqual(Polynomial([0]), 0)
+        self.assertEqual(Polynomial([5]), 5)
+        self.assertNotEqual(Polynomial([5]), 0)
 
     def test_derivative(self):
         """Tests for derivative."""
@@ -45,6 +49,26 @@ class TestPolynomials(unittest.TestCase):
         self.assertTrue(Polynomial([2, 9, 1]).is_monic())
         self.assertFalse(Polynomial([2, 9, 1]).is_linear_monic())
         self.assertFalse(Polynomial([2, 9]).is_monic())
+        self.assertEqual(Polynomial([]).degree, 0)
+        self.assertEqual(Polynomial([1]).degree, 0)
+        self.assertEqual(Polynomial([1, 1]).degree, 1)
+        self.assertEqual(Polynomial([1, 1, 1]).degree, 2)
+    
+    def test_add(self):
+        self.assertEqual(Polynomial([0, 3, 9, -1]) + Polynomial([2, 4, -9, -5, 4]),
+                         Polynomial([2, 7, 0, -6, 4]))
+    
+    def test_neg(self):
+        self.assertEqual(-Polynomial([0, 3, 9, -1]), Polynomial([0, -3, -9, 1]))
+    
+    def test_sub(self):
+        self.assertEqual(Polynomial([0, 3, 9, -1]) - Polynomial([2, 4, -9, -5, 4]),
+                         Polynomial([-2, -1, 18, 4, -4]))
+
+    def test_xpow(self):
+        self.assertEqual(Polynomial.xpow(5, 0), Polynomial([5]))
+        self.assertEqual(Polynomial.xpow(5, 1), Polynomial([0, 5]))
+        self.assertEqual(Polynomial.xpow(5, 3), Polynomial([0, 0, 0, 5]))
 
 if __name__ == '__main__':
     unittest.main()
