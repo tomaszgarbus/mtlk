@@ -69,6 +69,30 @@ class TestPolynomials(unittest.TestCase):
         self.assertEqual(Polynomial.xpow(5, 0), Polynomial([5]))
         self.assertEqual(Polynomial.xpow(5, 1), Polynomial([0, 5]))
         self.assertEqual(Polynomial.xpow(5, 3), Polynomial([0, 0, 0, 5]))
+    
+    def test_mul(self):
+        self.assertEqual(Polynomial([1, 2, 3]) * Polynomial([5]), Polynomial([5, 10, 15]))
+        self.assertEqual(Polynomial([1, 2, 3]) * Polynomial([0]), Polynomial([]))
+        self.assertEqual(Polynomial([1, 2, 3]) * Polynomial([]), Polynomial([]))
+        self.assertEqual(Polynomial([1, 1, 1, 1]) * Polynomial([1, 1, 1, 1]), Polynomial([1, 2, 3, 4, 3, 2, 1]))
+    
+    def test_long_division(self):
+        self.assertEqual(
+            Polynomial([-4, 0, -2, 1]).long_division(Polynomial([-3, 1])),
+            (Polynomial([3, 1, 1]), Polynomial([5]))
+        )
+        self.assertEqual(
+            Polynomial([-42, 0, -12, 1]).long_division(Polynomial([-3, 1])),
+            (Polynomial([-27, -9, 1]), Polynomial([-123]))
+        )
+        self.assertEqual(
+            Polynomial([-42, 0, -12, 1]).long_division(Polynomial([-3, 1, 1])),
+            (Polynomial([-13, 1]), Polynomial([-81, 16]))
+        )
+        with self.assertRaises(ValueError):
+            Polynomial([5, 4, 1]).long_division(0),
+        with self.assertRaises(ValueError):
+            Polynomial([5, 4, 1]).long_division(Polynomial([]))
 
 if __name__ == '__main__':
     unittest.main()

@@ -55,6 +55,13 @@ class Polynomial:
             new_coeffs[i] += coeff
         # Trimming of leading 0 coefficients will be done by constructor.
         return Polynomial(new_coeffs)
+    
+    def __mul__(self, other: Polynomial) -> Polynomial:
+        coeffs = [0 for _ in range(len(self._coeffs) + len(other.coeffs))]
+        for i, c1 in enumerate(self._coeffs):
+            for j, c2 in enumerate(other.coeffs):
+                coeffs[i + j] += c1 * c2
+        return Polynomial(coeffs)
 
     def __neg__(self) -> Polynomial:
         return Polynomial([-c for c in self._coeffs])
@@ -75,6 +82,9 @@ class Polynomial:
                  s += "%.2f * x^%d" % (c, i)
         return s
 
+    def __repr__(self) -> str:
+        return "Polynomial(%s)" % str(self._coeffs)
+
     def is_linear(self) -> bool:
         """True iff self is a linear polynomial."""
         return len(self._coeffs) <= 2
@@ -91,14 +101,24 @@ class Polynomial:
         """Performs synthetic division of self by `d`."""
         return NotImplementedError()
 
-    def long_division(self, d: Polynomial) -> Polynomial:
-        """Performs long division of self by `d`."""
+    def long_division(self, d: Polynomial) -> tuple[Polynomial, Polynomial]:
+        """Performs long division of self by `d`.
+        
+        Returns a pair (quotient, remainder)."""
         if d == 0:
-            return ValueError("The divisor must be non zero.")
+            # TODO: Reconsider raise vs return.
+            # Raise is _slightly_ easier to test.
+            raise ValueError("The divisor must be non zero.")
         r = self  # Remainder
+        q = Polynomial([])  # Quotient
         while r.degree >= d.degree:
-            pass
-        return NotImplementedError()
+            t = self.xpow(
+                r.coeffs[-1] / d.coeffs[-1],
+                r.degree - d.degree
+            )
+            q = q + t
+            r = r - t * d
+        return (q, r)
 
     def roots(self) -> list[float]:
         """Finds roots of the polynomial using"""
