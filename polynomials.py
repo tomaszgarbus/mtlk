@@ -3,6 +3,9 @@
 # https://stackoverflow.com/a/42845998
 from __future__ import annotations
 from functools import reduce
+from random import random
+import numpy as np
+import matplotlib.pyplot as plt
 
 class Polynomial:
     def __init__(self,
@@ -28,7 +31,7 @@ class Polynomial:
 
     def derivative(self) -> Polynomial:
         """Returns a derivative of self."""
-        return Polynomial(self._coeffs[1:])
+        return Polynomial([c * (i + 1) for i, c in enumerate(self._coeffs[1:])])
 
     def evaluate(self, x0: float) -> float:
         """Evaluates self at `x0`, using Horner method."""
@@ -72,18 +75,24 @@ class Polynomial:
     def __str__(self) -> str:
         if not self._coeffs:
             return "0"
-        s = ""
+        s = []
         for i, c in enumerate(self._coeffs):
+            if c == 0.:
+                continue
             if i == 0:
-                s += "%.2f" % c
+                s.append("%.2f" % c)
             elif i == 1:
-                s += "%.2f * x" % c
+                s.append("%.2f * x" % c)
             else:
-                 s += "%.2f * x^%d" % (c, i)
-        return s
+                 s.append("%.2f * x^%d" % (c, i))
+        return " + ".join(s)
 
     def __repr__(self) -> str:
         return "Polynomial(%s)" % str(self._coeffs)
+    
+    def is_constant(self) -> bool:
+        """True iff is a constant value."""
+        return len(self._coeffs) <= 1
 
     def is_linear(self) -> bool:
         """True iff self is a linear polynomial."""
@@ -97,9 +106,18 @@ class Polynomial:
         """True iff self is a linear monic polynomial."""
         return self.is_linear() and self.is_monic()
 
-    def synthetic_division(self, d: Polynomial) -> Polynomial:
-        """Performs synthetic division of self by `d`."""
-        return NotImplementedError()
+    def synthetic_division(self, d: Polynomial) -> tuple[Polynomial, Polynomial]:
+        """Performs synthetic division of self by `d`.
+
+        Returns a pair (quotient, remainder)."""
+        if d == 0 or not d.is_linear_monic():
+            raise ValueError("%s is not a linear monic polynomial" % d)
+        r = [0 for _ in self._coeffs[:-1]] + [self._coeffs[-1]]
+        i = len(self._coeffs) - 2
+        for c in self._coeffs[-2::-1]:
+            r[i] = c - r[i + 1] * d.coeffs[0]
+            i -= 1
+        return Polynomial(r[1:]), Polynomial([r[0]])
 
     def long_division(self, d: Polynomial) -> tuple[Polynomial, Polynomial]:
         """Performs long division of self by `d`.
@@ -107,7 +125,7 @@ class Polynomial:
         Returns a pair (quotient, remainder)."""
         if d == 0:
             # TODO: Reconsider raise vs return.
-            # Raise is _slightly_ easier to test.
+            # Raise is slightly easier to test.
             raise ValueError("The divisor must be non zero.")
         r = self  # Remainder
         q = Polynomial([])  # Quotient
@@ -119,7 +137,42 @@ class Polynomial:
             q = q + t
             r = r - t * d
         return (q, r)
+  
+    def __truediv__(self, other: Polynomial) -> Polynomial:
+        """Divides self by other.
+        
+        Uses synthetic division for linear monic polynomials and long
+        division for the general case."""
+        if other.is_linear_monic():
+            return self.synthetic_division(other)
+        return self.long_division(other)
 
-    def roots(self) -> list[float]:
-        """Finds roots of the polynomial using"""
-        return NotImplementedError()
+    def eval(self, x0: float) -> float:
+        """Evaluates self using Horner's method.
+        
+        TODO: Check if there is a way to overload the () operator,
+        i.e. use syntax a(5) instead of a.eval(5)."""
+        val = 0.
+        for c in self._coeffs[::-1]:
+            val = c + val * x0
+        return val
+
+    def roots(self, max_steps = 100, eps = 1e-9) -> list[float]:
+        """Finds roots of the polynomial using Newton's method."""
+        if self == 0:
+            raise ValueError("Trying to compute roots for 0 polynomial")
+        if self.is_constant():
+            return []
+        der = self.derivative()
+        x = 0.
+        while abs(der.eval(x)) < eps:
+            x = random()
+        for _ in range(max_steps):
+            if abs(self.eval(x)) < eps:
+                break
+            x = x - self.eval(x) / der.eval(x)
+        if abs(self.eval(x)) >= eps:
+            return []
+        if len(self._coeffs) <= 2:
+            return [x]
+        return [x] + (self / Polynomial([-x, 1]))[0].roots(max_steps, eps)

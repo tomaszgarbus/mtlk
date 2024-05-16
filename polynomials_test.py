@@ -1,6 +1,7 @@
 import unittest
 import math
 from polynomials import Polynomial
+import numpy as np
 
 class TestPolynomials(unittest.TestCase):
 
@@ -23,8 +24,10 @@ class TestPolynomials(unittest.TestCase):
 
     def test_derivative(self):
         """Tests for derivative."""
-        poly = Polynomial([4, 8, 9, 3])
-        self.assertEqual(poly.derivative(), Polynomial([8, 9, 3]))
+        self.assertEqual(
+            Polynomial([4, 8, 9, 3]).derivative(), Polynomial([8, 18, 9]))
+        self.assertEqual(
+            Polynomial([0, 0, 7, 90, 100]).derivative(), Polynomial([0, 14, 270, 400]))
 
     def test_evaluate(self):
         """Tests for evaluation."""
@@ -53,6 +56,11 @@ class TestPolynomials(unittest.TestCase):
         self.assertEqual(Polynomial([1]).degree, 0)
         self.assertEqual(Polynomial([1, 1]).degree, 1)
         self.assertEqual(Polynomial([1, 1, 1]).degree, 2)
+        self.assertTrue(Polynomial([]).is_constant())
+        self.assertTrue(Polynomial([0]).is_constant())
+        self.assertTrue(Polynomial([18]).is_constant())
+        self.assertTrue(Polynomial([18, 0]).is_constant())
+        self.assertFalse(Polynomial([18, 1]).is_constant())
     
     def test_add(self):
         self.assertEqual(Polynomial([0, 3, 9, -1]) + Polynomial([2, 4, -9, -5, 4]),
@@ -93,6 +101,54 @@ class TestPolynomials(unittest.TestCase):
             Polynomial([5, 4, 1]).long_division(0),
         with self.assertRaises(ValueError):
             Polynomial([5, 4, 1]).long_division(Polynomial([]))
+    
+    def test_short_division(self):
+        self.assertEqual(
+            Polynomial([-42, 0, -12, 1]).synthetic_division(Polynomial([-3, 1])),
+            (Polynomial([-27, -9, 1]), Polynomial([-123]))
+        )
+        self.assertEqual(
+            Polynomial([-4, 0, -2, 1]).synthetic_division(Polynomial([-3, 1])),
+            (Polynomial([3, 1, 1]), Polynomial([5]))
+        )
+        with self.assertRaises(ValueError):
+            Polynomial([5, 4, 1]).synthetic_division(0)
+        with self.assertRaises(ValueError):
+            Polynomial([5, 4, 1]).synthetic_division(Polynomial([]))
+        with self.assertRaises(ValueError):
+            Polynomial([5, 4, 1]).synthetic_division(Polynomial([1, 3]))
+        with self.assertRaises(ValueError):
+            Polynomial([5, 4, 1]).synthetic_division(Polynomial([1, 3, 0, 9]))
+    
+    def test_eval(self):
+        np.testing.assert_almost_equal(
+            Polynomial([1, 1, 1, 0, 1]).eval(2),
+            1 + 2 + 4 + 16
+        )
+        np.testing.assert_almost_equal(
+            Polynomial([5, 9, -1, 8, 4]).eval(17),
+            5 + 9 * 17 - 1 * 17**2 + 8 * 17 ** 3 + 4 * 17 ** 4
+        )
+    
+    def test_roots(self):
+        np.testing.assert_almost_equal(
+            Polynomial([-3, 1]).roots(),
+            [3]
+        )
+        np.testing.assert_almost_equal(
+            Polynomial([3, 0, 1]).roots(),
+            []
+        )
+        np.testing.assert_almost_equal(
+            sorted(Polynomial([-1, 0, 1]).roots()),
+            [-1, 1]
+        )
+        np.testing.assert_almost_equal(
+            sorted(Polynomial([18]).roots()),
+            []
+        )
+        with self.assertRaises(ValueError):
+            Polynomial([]).roots()
 
 if __name__ == '__main__':
     unittest.main()
