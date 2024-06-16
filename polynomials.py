@@ -4,10 +4,9 @@
 from __future__ import annotations
 from functools import reduce
 from random import random
-import numpy as np
-import matplotlib.pyplot as plt
 
 class Polynomial:
+    """Representation of a Polynomial. Not necessarily efficient."""
     def __init__(self,
                  coeffs: list[float]):
         self._coeffs = coeffs
