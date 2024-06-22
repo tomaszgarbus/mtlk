@@ -5,6 +5,10 @@ from __future__ import annotations
 from functools import reduce
 from random import random
 
+from divided_differences import DividedDifferences
+
+_EQ_EPS = 1e-4
+
 class Polynomial:
     """Representation of a Polynomial. Not necessarily efficient."""
     def __init__(self,
@@ -40,7 +44,10 @@ class Polynomial:
           0)
 
     def __eq__(self, value: object) -> bool:
-        if isinstance(value, Polynomial) and self._coeffs == value.coeffs:
+        if isinstance(value, Polynomial):
+            for (c1, c2) in zip(self._coeffs, value.coeffs):
+                if abs(c1 - c2) > _EQ_EPS:
+                    return False
             return True
         # For numeric values:
         if len(self._coeffs) == 1 and self._coeffs[0] == value:
@@ -58,7 +65,11 @@ class Polynomial:
         # Trimming of leading 0 coefficients will be done by constructor.
         return Polynomial(new_coeffs)
     
-    def __mul__(self, other: Polynomial) -> Polynomial:
+    def __mul__(self, other: Polynomial | float | int) -> Polynomial:
+        if type(other) in [int, float]:
+            return Polynomial(
+                [other * c for c in self._coeffs]
+            )
         coeffs = [0 for _ in range(len(self._coeffs) + len(other.coeffs))]
         for i, c1 in enumerate(self._coeffs):
             for j, c2 in enumerate(other.coeffs):
@@ -175,3 +186,26 @@ class Polynomial:
         if len(self._coeffs) <= 2:
             return [x]
         return [x] + (self / Polynomial([-x, 1]))[0].roots(max_steps, eps)
+
+def newton_interpolation(points: list[tuple[float, float]]) -> Polynomial:
+    """Newton interpolation of a polynomial.
+    
+    Returns a polynomial of degree n going through all n+1
+    provided points.
+    
+    Points must be in format [x, y]."""
+    points = sorted(points)
+    xs, _ = zip(*points)
+    if len(set(xs)) != len(xs):
+        raise ValueError("xs must be unique")
+    dd = DividedDifferences(points)
+    
+    p = Polynomial([1])
+    newton = Polynomial([0])
+    for i, xy in enumerate(points):
+        x, _ = xy
+        coeff = dd.retrieve(0, i)
+        newton += p * coeff
+        p = p * Polynomial([-x, 1])
+    
+    return newton

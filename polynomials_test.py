@@ -1,6 +1,6 @@
 import unittest
 import math
-from polynomials import Polynomial
+from polynomials import Polynomial, newton_interpolation
 import numpy as np
 
 class TestPolynomials(unittest.TestCase):
@@ -81,6 +81,9 @@ class TestPolynomials(unittest.TestCase):
     def test_mul(self):
         self.assertEqual(Polynomial([1, 2, 3]) * Polynomial([5]), Polynomial([5, 10, 15]))
         self.assertEqual(Polynomial([1, 2, 3]) * Polynomial([0]), Polynomial([]))
+        self.assertEqual(Polynomial([1, 2, 3]) * 5, Polynomial([5, 10, 15]))
+        self.assertEqual(Polynomial([1, 2, 3]) * 5.0, Polynomial([5, 10, 15]))
+        self.assertEqual(Polynomial([1, 2, 3]) * 0, Polynomial([]))
         self.assertEqual(Polynomial([1, 2, 3]) * Polynomial([]), Polynomial([]))
         self.assertEqual(Polynomial([1, 1, 1, 1]) * Polynomial([1, 1, 1, 1]), Polynomial([1, 2, 3, 4, 3, 2, 1]))
     
@@ -149,6 +152,45 @@ class TestPolynomials(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             Polynomial([]).roots()
+    
+    def test_newton_interpolation_validates_input(self):
+        with self.assertRaises(ValueError):
+            newton_interpolation([
+                (5, 1),
+                (5, 2),
+                (8, 4)
+            ])
+    
+    def test_newton_interpolation_sorts_input(self):
+        self.assertEqual(
+            newton_interpolation([
+                (0, 4),
+                (9, 5),
+                (-13.5, 2.71),
+                (-0.99, 12.3)
+            ]),
+            newton_interpolation([
+                (-13.5, 2.71),
+                (-0.99, 12.3),
+                (0, 4),
+                (9, 5)
+            ])
+        )
+    
+    def test_newton_interpolation(self):
+        # Test from https://en.wikipedia.org/wiki/Newton_polynomial
+        self.assertEqual(
+            newton_interpolation([
+                (-3/2, -14.1014),
+                (-3/4, -0.931596),
+                (0, 0),
+                (3/4, 0.931596),
+                (3/2, 14.1014)
+            ]),
+            Polynomial([
+                -0.00005, -1.4775, -0.00001, 4.83484
+            ])
+        )
 
 if __name__ == '__main__':
     unittest.main()
