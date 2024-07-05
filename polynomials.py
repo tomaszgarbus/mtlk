@@ -45,16 +45,14 @@ class Polynomial:
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Polynomial):
+            if len(self._coeffs) != len(value.coeffs):
+                return False
             for (c1, c2) in zip(self._coeffs, value.coeffs):
                 if abs(c1 - c2) > _EQ_EPS:
                     return False
             return True
         # For numeric values:
-        if len(self._coeffs) == 1 and self._coeffs[0] == value:
-            return True
-        if not self._coeffs and value == 0:
-            return True
-        return False
+        return self.__eq__(Polynomial([value]))
     
     def __add__(self, other: Polynomial) -> Polynomial:
         new_coeffs = [0 for _ in range(max(self.degree, other.degree) + 1)]
@@ -187,6 +185,7 @@ class Polynomial:
             return [x]
         return [x] + (self / Polynomial([-x, 1]))[0].roots(max_steps, eps)
 
+
 def newton_interpolation(points: list[tuple[float, float]]) -> Polynomial:
     """Newton interpolation of a polynomial.
     
@@ -209,3 +208,44 @@ def newton_interpolation(points: list[tuple[float, float]]) -> Polynomial:
         p = p * Polynomial([-x, 1])
     
     return newton
+
+def lagrange_interpolation(points: list[tuple[float, float]]) -> Polynomial:
+    """Lagrange interpolation of a polynomial.
+
+    Returns a polynomial of degree n going through all n+1
+    provided points.
+    
+    Points must be in format [x, y]."""
+    points = sorted(points)
+    xs, _ = zip(*points)
+    if len(set(xs)) != len(xs):
+        raise ValueError("xs must be unique")
+    
+    lagrange = Polynomial([])
+
+    for i in range(len(points)):
+        denominator = 1.
+        numerator = Polynomial([1])
+        for j in range(len(points)):
+            if i != j:
+                numerator *= Polynomial([-points[j][0], 1])
+                denominator *= points[i][0] - points[j][0]
+        lagrange += numerator * (points[i][1] / denominator)
+
+    return lagrange
+
+def interpolate(points: list[tuple[float, float]], method = 'lagrange') -> Polynomial:
+    """Interpolates a polynomial.
+
+    Returns a polynomial of degree n going through all n+1
+    provided points.
+
+    Method must be either "newton" or "lagrange".
+
+    Points must be in format [x, y]."""
+    if method == 'lagrange':
+        return lagrange_interpolation(points)
+    elif method == 'newton':
+        return newton_interpolation(points)
+    else:
+        raise ValueError("unknown interpolation method")

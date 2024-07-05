@@ -1,6 +1,6 @@
 import unittest
 import math
-from polynomials import Polynomial, newton_interpolation
+from polynomials import Polynomial, interpolate, newton_interpolation
 import numpy as np
 
 class TestPolynomials(unittest.TestCase):
@@ -153,44 +153,50 @@ class TestPolynomials(unittest.TestCase):
         with self.assertRaises(ValueError):
             Polynomial([]).roots()
     
-    def test_newton_interpolation_validates_input(self):
-        with self.assertRaises(ValueError):
-            newton_interpolation([
-                (5, 1),
-                (5, 2),
-                (8, 4)
-            ])
+    def test_interpolation_validates_input(self):
+        for method in ["newton", "lagrange"]:
+            with self.subTest(method):
+                with self.assertRaises(ValueError):
+                    interpolate([
+                        (5, 1),
+                        (5, 2),
+                        (8, 4)
+                    ], method)
     
-    def test_newton_interpolation_sorts_input(self):
-        self.assertEqual(
-            newton_interpolation([
-                (0, 4),
-                (9, 5),
-                (-13.5, 2.71),
-                (-0.99, 12.3)
-            ]),
-            newton_interpolation([
-                (-13.5, 2.71),
-                (-0.99, 12.3),
-                (0, 4),
-                (9, 5)
-            ])
-        )
+    def test_interpolation_sorts_input(self):
+        for method in ["newton", "lagrange"]:
+            with self.subTest(method):
+                self.assertEqual(
+                    interpolate([
+                        (0, 4),
+                        (9, 5),
+                        (-13.5, 2.71),
+                        (-0.99, 12.3)
+                    ], method),
+                    interpolate([
+                        (-13.5, 2.71),
+                        (-0.99, 12.3),
+                        (0, 4),
+                        (9, 5)
+                    ], method)
+                )
     
-    def test_newton_interpolation(self):
+    def test_interpolation(self):
         # Test from https://en.wikipedia.org/wiki/Newton_polynomial
-        self.assertEqual(
-            newton_interpolation([
-                (-3/2, -14.1014),
-                (-3/4, -0.931596),
-                (0, 0),
-                (3/4, 0.931596),
-                (3/2, 14.1014)
-            ]),
-            Polynomial([
-                -0.00005, -1.4775, -0.00001, 4.83484
-            ])
-        )
+        for method in ["newton", "lagrange"]:
+            with self.subTest(method):
+                self.assertEqual(
+                    interpolate([
+                        (-3/2, -14.1014),
+                        (-3/4, -0.931596),
+                        (0, 0),
+                        (3/4, 0.931596),
+                        (3/2, 14.1014)
+                    ], method),
+                    Polynomial([
+                        -0.00005, -1.4775, -0.00001, 4.83484
+                    ])
+                )
 
 if __name__ == '__main__':
     unittest.main()
