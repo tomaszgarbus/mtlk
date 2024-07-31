@@ -10,7 +10,6 @@ class BezierCurve:
 
 
     def evaluate(self, t: float) -> tuple[float, float]:
-        print(t)
         """Evaluate the curve at t \in [0; 1]."""
         if t < 0 or t > 1:
             return ValueError("t must be in range [0; 1]")
