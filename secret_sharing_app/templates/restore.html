@@ -1,0 +1,17 @@
+<!doctype html>
+<title>Secret sharing app</title>
+
+Input {{ degree }} (x, y) pairs to restore the secret:
+<br />
+
+<form action="{{ url_for('final') }}" method="post">
+  {% for i in range(degree) %}
+    <input type="number" name="x_{{i}}" />
+    <input type="number" name="y_{{i}}" />
+    <br />
+  {% endfor %}
+  <input type="number" hidden="true" name="degree" value="{{ degree }}" />
+  <input type="submit" value="Restore the secret:" />
+</form>
+
+</input>

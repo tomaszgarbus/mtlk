@@ -1,0 +1,18 @@
+<!doctype html>
+<title>Secret sharing app</title>
+
+Please preserve at least {{ degree }} of the below pairs of integers
+to restore the secret:
+<br />
+
+{% for part in parts %}
+  x: {{ part[0] }}, y: {{ part[1] }}
+  <br />
+{% endfor %}
+
+<form action="{{ url_for('restore') }}" method="post">
+  <input type="number" hidden="true" name="degree" value="{{ degree }}" />
+  <input type="submit" value="Ok thanks" />
+</form>
+
+</input>

@@ -1,0 +1,19 @@
+<!doctype html>
+<title>Secret sharing app</title>
+<h1>Welcome!</h1>
+Input your secret numerical message
+(smaller than {{ modulus }}):
+<form action="{{ url_for('generate') }}" method="post">
+  <input type="number" name="secret" />
+  <br />
+
+  How many parts to distribute?
+  <input type="number" name="num_parts" />
+  <br />
+
+  How many parts should suffice to recover the secret?
+  <input type="number" name="degree" />
+  <br />
+
+  <input type="submit" value="Go!" />
+</form>
