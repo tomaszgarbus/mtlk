@@ -2,8 +2,6 @@
 
 https://www.math.cmu.edu/~mradclif/teaching/127S19/Notes/ChineseRemainderTheorem.pdf
 """
-import itertools
-import operator
 from modulo_division import inv_mod
 
 def crt_solve(x: list[int], y: list[int]) -> int:
