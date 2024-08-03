@@ -1,6 +1,6 @@
 from extended_euclidean_algorithm import egcd
 
-def div_inv(a: int, m: int):
+def inv_mod(a: int, m: int):
     """Modular inversion.
     
     Returns a^(-1) in modular arithmetic modulo m."""
@@ -14,4 +14,4 @@ def div_inv(a: int, m: int):
 
 def div_mod(a: int, b: int, m: int):
     """Returns a / b in modular arithmetic modulo m."""
-    return a * div_inv(b, m) % m
+    return a * inv_mod(b, m) % m
