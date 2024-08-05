@@ -123,6 +123,30 @@ class TestPolynomials(unittest.TestCase):
         with self.assertRaises(ValueError):
             Polynomial([5, 4, 1]).synthetic_division(Polynomial([1, 3, 0, 9]))
     
+    def test_truediv(self):
+        self.assertEqual(
+            Polynomial([-42, 0, -12, 1]) / Polynomial([-3, 1]),
+            (Polynomial([-27, -9, 1]), Polynomial([-123]))
+        )
+    
+    def test_floordiv(self):
+        self.assertEqual(
+            Polynomial([-42, 0, -12, 1]) // Polynomial([-3, 1]),
+            Polynomial([-27, -9, 1])
+        )
+    
+    def test_modulo(self):
+        self.assertEqual(
+            Polynomial([-42, 0, -12, 1]) % Polynomial([-3, 1]),
+            Polynomial([-123])
+        )
+    
+    def test_neg(self):
+        self.assertEqual(
+            -Polynomial([1, 2, 3, 4, 5]),
+            Polynomial([-1, -2, -3, -4, -5])
+        )
+    
     def test_eval(self):
         np.testing.assert_almost_equal(
             Polynomial([1, 1, 1, 0, 1]).eval(2),

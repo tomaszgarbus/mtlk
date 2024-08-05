@@ -20,6 +20,3 @@ def crt_solve(x: list[int], y: list[int]) -> int:
         z += m * y[i] * m_inv
         z %= X
     return z
-
-if __name__ == '__main__':
-    print(crt_solve([5, 7, 11], [2, 3, 10]))

@@ -146,7 +146,7 @@ class Polynomial:
             r = r - t * d
         return (q, r)
   
-    def __truediv__(self, other: Polynomial) -> Polynomial:
+    def __truediv__(self, other: Polynomial) -> tuple[Polynomial, Polynomial]:
         """Divides self by other.
         
         Uses synthetic division for linear monic polynomials and long
@@ -154,6 +154,21 @@ class Polynomial:
         if other.is_linear_monic():
             return self.synthetic_division(other)
         return self.long_division(other)
+    
+    def __floordiv__(self, other: Polynomial) -> Polynomial:
+        """Divides self by other and ignores remainder.
+        
+        Same as truediv but returns only quotient."""
+        return (self / other)[0]
+
+    def __mod__(self, other: Polynomial) -> Polynomial:
+        """Modulo operator."""
+        return (self / other)[1]
+    
+    def __neg__(self) -> Polynomial:
+        """Returns (-self)."""
+        coeffs = list(map(lambda c: -c, self.coeffs))
+        return Polynomial(coeffs)
 
     def eval(self, x0: float) -> float:
         """Evaluates self using Horner's method.
