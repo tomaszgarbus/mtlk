@@ -15,14 +15,14 @@ class TestExtendedEuclideanAlgorithm(unittest.TestCase):
     def test_egcd_polynoial(self):
         self.assertEqual(
             egcd_polynomial(
-                Polynomial([7, 6, 0, 3]),
+                Polynomial([7, 6, 0, 1]),
                 Polynomial([2, 3, 1])
             ),
             (
-                Polynomial([1, 1])
-            ),
-            Polynomial([1 / 13]),
-            Polynomial([-3 / 13, 1 / 13])
+                Polynomial([1, 1]),
+                Polynomial([1 / 13]),
+                Polynomial([3 / 13, - 1 / 13])
+            )
         )
 
 if __name__ == '__main__':

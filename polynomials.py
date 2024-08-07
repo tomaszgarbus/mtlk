@@ -137,7 +137,7 @@ class Polynomial:
             raise ValueError("The divisor must be non zero.")
         r = self  # Remainder
         q = Polynomial([])  # Quotient
-        while r.degree >= d.degree:
+        while r != 0 and r.degree >= d.degree:
             t = self.xpow(
                 r.coeffs[-1] / d.coeffs[-1],
                 r.degree - d.degree
