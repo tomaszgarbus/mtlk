@@ -1,5 +1,5 @@
 import unittest
-from secret_sharing_app.lib import PolynomialModulo, lagrange_interpolation
+from polynomials_modulo import PolynomialModulo, lagrange_interpolation
 
 class PolynomialModuloTest(unittest.TestCase):
 

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from secret_sharing_app.lib import lagrange_interpolation, PolynomialModulo
+from polynomials_modulo import lagrange_interpolation, PolynomialModulo
 from random import randint
 
 app = Flask(__name__)
