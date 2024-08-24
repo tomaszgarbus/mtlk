@@ -8,7 +8,7 @@ def create_transforms_for_melody(melody: list[int]) -> dict[str, str]:
     transforms = {}
     transforms['x'] = 'x + 1'
     transforms['ydelta'] = str(ge.polynomial_interpolation(
-        [(i, 0) for i in range(12)] + [(12, 1)], 13
+        [(i, 0) for i in range(11)] + [(11, 1), (12, 0)], 13
     ))
     transforms['y'] = 'y + ydelta'
 
@@ -86,5 +86,24 @@ def create_config_for_melody(melody: list[int]) -> dict:
 
     return result
 
+# -------G
+# DBB-AGGC
+# -BBAAG-G
+# DBBAAGGE
+# ED----F#G
+# DBBAAGGC
+# -BBA-GGA
+# -E----GE
+# GGGF#GGGG
+# GF#GGGGBG
+
 if __name__ == '__main__':
-    print(json.dumps(create_config_for_melody(list(range(12)) * 13)))
+    melody = [
+      5,
+      12, 9, 9, 9, 7, 5, 5, 10,
+      10, 9, 9, 7, 7, 5, 5, 5,
+      12, 9, 9, 7, 7, 5, 5, 2,
+      2, 0, 0, 0, 0, 0, 0,
+    ]
+    melody = melody * (169 // len(melody))
+    print(json.dumps(create_config_for_melody(melody)))
