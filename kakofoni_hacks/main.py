@@ -16,14 +16,14 @@ def create_transforms_for_melody(melody: list[int]) -> dict[str, str]:
     melody += [0 for _ in range(169 - len(melody))]
 
     # Melody is m_0, m_1, ..., m_169.
-    # We will encode it in a function \sum_{i < 13, j < 13} w_{ij} * x^i * y^j.
+    # We will encode it in a function \sum_{i < 13, j < 13} w_{ij} * y^i * x^j.
     # Values of x, y:
     # (0, 0), (1, 0), ..., (12, 0), (0, 1), (1, 1), ..., (12, 1), ..., (12, 12)
     matrix = []
     for y in range(13):
         for x in range(13):
             matrix.append([
-                ((x ** j) % 13) * ((y ** i) % 13) % 13
+                ((y ** i) % 13) * ((x ** j) % 13) % 13
                 for i in range(13) for j in range(13)
             ] + [melody[y * 13 + x]])
     
@@ -31,10 +31,24 @@ def create_transforms_for_melody(melody: list[int]) -> dict[str, str]:
     ge.print_matrix(matrix)
 
     z_components = []
-    for i in range(13):
-        for j in range(13):
-            z_components.append(f'{matrix[i * 13 + j][169]} * x^{j} * y^{i}')
+    for y in range(13):
+        for x in range(13):
+            z_components.append(f'{matrix[y * 13 + x][169]} * x^{x} * y^{y}')
     transforms['z'] = ' + '.join(z_components)
+
+    ### TEST
+    results = []
+    for y in range(13):
+        for x in range(13):
+            s = 0
+            for i in range(13):
+                for j in range(13):
+                    s += matrix[i * 13 + j][169] * (y ** i) * (x ** j) % 13
+            s %= 13
+            results.append(s == melody[y * 13 + x])
+            print(s, melody[y * 13 + x])
+    print(results)
+
     return transforms
 
 
@@ -73,4 +87,4 @@ def create_config_for_melody(melody: list[int]) -> dict:
     return result
 
 if __name__ == '__main__':
-    print(json.dumps(create_config_for_melody([1, 2, 3, 9, 8, 7] * 15)))
+    print(json.dumps(create_config_for_melody(list(range(12)) * 13)))
