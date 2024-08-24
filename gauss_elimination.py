@@ -51,12 +51,6 @@ def gauss_elimination(matrix: list[list[int]]):
 def gauss_elimination_mod(matrix: list[list[int]], mod: int):
     """Gaussian elimination modulo `mod`."""
 
-    def print_matrix(m):
-        print("matrix: ")
-        for row in m:
-            print(row)
-        print()
-
     def swap_rows(m, r1, r2):
         """Swaps row `r1` with row `r2`."""
         m[r1], m[r2] = m[r2], m[r1]

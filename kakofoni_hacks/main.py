@@ -73,4 +73,4 @@ def create_config_for_melody(melody: list[int]) -> dict:
     return result
 
 if __name__ == '__main__':
-    print(json.dumps(create_config_for_melody([1, 2, 3] * 30)))
+    print(json.dumps(create_config_for_melody([1, 2, 3, 9, 8, 7] * 15)))
