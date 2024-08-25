@@ -28,7 +28,7 @@ def create_transforms_for_melody(melody: list[int]) -> dict[str, str]:
             ] + [melody[y * 13 + x]])
     
     ge.gauss_elimination_mod(matrix, 13)
-    ge.print_matrix(matrix)
+    # ge.print_matrix(matrix)
 
     z_components = []
     for y in range(13):
@@ -37,17 +37,15 @@ def create_transforms_for_melody(melody: list[int]) -> dict[str, str]:
     transforms['z'] = ' + '.join(z_components)
 
     ### TEST
-    results = []
-    for y in range(13):
-        for x in range(13):
-            s = 0
-            for i in range(13):
-                for j in range(13):
-                    s += matrix[i * 13 + j][169] * (y ** i) * (x ** j) % 13
-            s %= 13
-            results.append(s == melody[y * 13 + x])
-            print(s, melody[y * 13 + x])
-    print(results)
+    # results = []
+    # for y in range(13):
+    #     for x in range(13):
+    #         s = 0
+    #         for i in range(13):
+    #             for j in range(13):
+    #                 s += matrix[i * 13 + j][169] * (y ** i) * (x ** j) % 13
+    #         s %= 13
+    #         results.append(s == melody[y * 13 + x])
 
     return transforms
 
@@ -85,17 +83,6 @@ def create_config_for_melody(melody: list[int]) -> dict:
     }
 
     return result
-
-# -------G
-# DBB-AGGC
-# -BBAAG-G
-# DBBAAGGE
-# ED----F#G
-# DBBAAGGC
-# -BBA-GGA
-# -E----GE
-# GGGF#GGGG
-# GF#GGGGBG
 
 if __name__ == '__main__':
     melody = [
