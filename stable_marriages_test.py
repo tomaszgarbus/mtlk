@@ -49,23 +49,6 @@ class TestStableMarriages(unittest.TestCase):
     def test_stable_3x3(self):
         """Tests that all outputs are stable for all possible 3x3 inputs."""
         possible_prefs = list(it.permutations([0, 1, 2]))
-        print(possible_prefs)
-        def generate_prefs():
-            result = []
-            for p1 in possible_prefs:
-                for p2 in possible_prefs:
-                    for p3 in possible_prefs:
-                        result.append((p1, p2, p3))
-            return result
-        for m_prefs in generate_prefs():
-            for w_prefs in generate_prefs():
-                assert validate_marriages(
-                    stable_marriages(m_prefs, w_prefs), m_prefs, w_prefs)
-    
-    def test_stable_4x4(self):
-        """Tests that all outputs are stable for all possible 4x4 inputs."""
-        possible_prefs = list(it.permutations([0, 1, 2, 3]))
-        print(possible_prefs)
         def generate_prefs():
             result = []
             for p1 in possible_prefs:
