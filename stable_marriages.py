@@ -1,3 +1,5 @@
+import heapq
+
 def _build_ranking(preferences: list[list[int]]) -> list[list[int]]:
     """Transforms the preferences for one gender into a ranking.
     
@@ -95,6 +97,51 @@ def validate_marriages(
                 and women_ranking[w][m] < women_ranking[w][w_to_m[w]]):
                 return False
     return True
+
+
+# TODO: rewrite regular stable marriage as a special case of this implementation.
+def stable_marriages_with_capacity(
+    student_preferences: list[list[int]],
+    hospitals_preferences: list[list[int]],
+    capacity: int,
+) -> list[int]:
+    """
+    Produces a stable matching with capacity between medical students and hospitals.
+
+    Students are indexed from 0 to N, hospitals from 0 to M. We assume that N = M x capacity.
+
+    On input, student_preferences[i] is a sorted list of all M hospitals from most preferred to least.
+
+    On output, the function produces the list of matches from the students' perspective. That is, output[i] the
+    hospital into which i-th student got accepted.
+    """
+    N = len(student_preferences)
+    M = len(hospitals_preferences)
+
+    assert N == M * capacity
+
+    # Hospitals' ranking of students for faster lookup.
+    hospitals_ranking = _build_ranking(hospitals_preferences)
+    # Students who either don't have assignment yet or lost it to another student.
+    unassigned_students = [i for i in range(N)]
+    # Next hospital to try for each student.
+    next_hospital = [0 for _ in range(N)]
+    # Student to hospital assignments.
+    s_to_h = [None for _ in range(N)]
+    # Hospital to student assignments.
+    # Set contains elements (-ranking, student number) so that less preferred student
+    # always lands as smallest element.
+    h_to_s: list[list[int, int]] = [set() for _ in range(M)]
+    while unassigned_students:
+        s = unassigned_students.pop()
+        h = student_preferences[s][next_hospital[s]]
+        next_hospital[s] += 1
+        heapq.heappush(h_to_s[h], (-hospitals_ranking[h][s], s))
+        if len(h_to_s) > capacity:
+            _, dropped_s = heapq.heappop(h_to_s)
+            s_to_h[dropped_s] = None
+            unassigned_students.append(dropped_s)
+    return s_to_h
 
 
 if __name__ == "__main__":
