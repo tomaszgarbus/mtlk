@@ -6,10 +6,11 @@ def _build_ranking(preferences: list[list[int]]) -> list[list[int]]:
     If output[i][j] = k, then it means that for person `i`, the person `j` of opposite gender
     is the k-th best choice (indexing from 0)."""
     N = len(preferences)
-    ranking = [[0 for _ in range(N)] for _ in range(N)]
-    for person in range(N):
-        for idx, candidate in enumerate(preferences[person]):
-            ranking[person][candidate] = idx
+    M = len(preferences[0])
+    ranking = [[0 for _ in range(M)] for _ in range(N)]
+    for target in range(N):
+        for idx, candidate in enumerate(preferences[target]):
+            ranking[target][candidate] = idx
     return ranking
 
 
@@ -99,7 +100,6 @@ def validate_marriages(
     return True
 
 
-# TODO: rewrite regular stable marriage as a special case of this implementation.
 def stable_marriages_with_capacity(
     student_preferences: list[list[int]],
     hospitals_preferences: list[list[int]],
@@ -131,34 +131,64 @@ def stable_marriages_with_capacity(
     # Hospital to student assignments.
     # Set contains elements (-ranking, student number) so that less preferred student
     # always lands as smallest element.
-    h_to_s: list[list[int, int]] = [set() for _ in range(M)]
+    h_to_s: list[list[int, int]] = [[] for _ in range(M)]
     while unassigned_students:
         s = unassigned_students.pop()
         h = student_preferences[s][next_hospital[s]]
         next_hospital[s] += 1
         heapq.heappush(h_to_s[h], (-hospitals_ranking[h][s], s))
-        if len(h_to_s) > capacity:
-            _, dropped_s = heapq.heappop(h_to_s)
+        s_to_h[s] = h
+        if len(h_to_s[h]) > capacity:
+            _, dropped_s = heapq.heappop(h_to_s[h])
             s_to_h[dropped_s] = None
             unassigned_students.append(dropped_s)
+    assert validate_marriages_with_capacity(
+        s_to_h, student_preferences, hospitals_preferences)
     return s_to_h
 
 
+def validate_marriages_with_capacity(
+    s_to_h: list[int],
+    student_preferences: list[list[int]],
+    hospitals_preferences: list[list[int]],
+) -> bool:
+    students_ranking = _build_ranking(student_preferences)
+    hospitals_ranking = _build_ranking(hospitals_preferences)
+    N = len(student_preferences)
+    M = len(hospitals_preferences)
+    last_accepted_s = [0 for _ in range(M)]
+    for s, h in enumerate(s_to_h):
+        last_accepted_s[h] = max(last_accepted_s[h], hospitals_ranking[h][s])
+    for s in range(N):
+        for h in range(M):
+            if s_to_h[s] == h:
+                continue
+            elif (
+                students_ranking[s][h] < students_ranking[s][s_to_h[s]]
+                and hospitals_ranking[h][s] < last_accepted_s[h]
+            ):
+                return False
+    return True
+
+
 if __name__ == "__main__":
-    m_prefs = [
-        [3, 5, 4, 2, 1, 0],
-        [2, 3, 1, 0, 4, 5],
-        [5, 2, 1, 0, 3, 4],
-        [0, 1, 2, 3, 4, 5],
-        [4, 5, 1, 2, 0, 3],
-        [0, 1, 2, 3, 4, 5],
+    s_prefs = [
+        [0, 1, 2],
+        [2, 0, 1],
+        [2, 1, 0],
+        [1, 0, 2],
+        [2, 1, 0],
+        [0, 2, 1],
+        [0, 1, 2],
+        [1, 2, 0],
+        [0, 1, 2],
     ]
-    w_prefs = [
-        [3, 5, 4, 2, 1, 0],
-        [2, 3, 1, 0, 4, 5],
-        [5, 2, 1, 0, 3, 4],
-        [0, 1, 2, 3, 4, 5],
-        [4, 5, 1, 2, 0, 3],
-        [0, 1, 2, 3, 4, 5],
+    h_prefs = [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        [2, 5, 7, 3, 6, 8, 0, 1, 4],
+        [1, 3, 8, 2, 6, 5, 0, 7, 4],
     ]
-    print(stable_marriages(m_prefs, w_prefs))
+    print(stable_marriages_with_capacity(
+        s_prefs, h_prefs, 3
+    ))
+    
