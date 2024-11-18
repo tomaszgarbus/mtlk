@@ -1,4 +1,6 @@
+from copy import deepcopy
 import heapq
+from typing import Optional
 
 def _build_ranking(preferences: list[list[int]]) -> list[list[int]]:
     """Transforms the preferences for one gender into a ranking.
@@ -169,6 +171,35 @@ def validate_marriages_with_capacity(
             ):
                 return False
     return True
+
+
+def stable_roommates(
+    preferences: list[list[int]]
+) -> Optional[list[int]]:
+    """
+    Produces a stable roommates matching if such exists.
+
+    Implementation of Robert Irving's algorithm: https://uvacs2102.github.io/docs/roomates.pdf
+
+    `preferences` on input must be exactly square i.e. len(preferences) == len(preferences[i]) for every i.
+    """
+    preferences = deepcopy(preferences)
+    n = len(preferences)
+    next_choice_idx = [0 for _ in range(n)]
+    ranking = _build_ranking(preferences)
+    held_proposal = [None for _ in range(n)]
+
+    # Phase 1: Reduce the list of preferences.
+    set_proposed_to = set()
+    for person in range(n):
+        suitor = person
+        while suitor is not None:
+            suited = preferences[person][next_choice_idx[suitor]]
+            next_choice_idx[person] += 1
+            if held_proposal[suited] is None or ranking[suited][suitor] < ranking[suited][held_proposal[suited]]:
+                held_proposal[suited], suitor = suitor, held_proposal[suited]
+    
+    
 
 
 if __name__ == "__main__":
