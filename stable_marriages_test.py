@@ -1,5 +1,5 @@
 import unittest
-from stable_marriages import stable_marriages, stable_marriages_with_capacity, validate_marriages, validate_marriages_with_capacity
+from stable_marriages import stable_marriages, stable_marriages_with_capacity, validate_marriages, validate_marriages_with_capacity, stable_roommates
 import itertools as it
 
 class TestStableMarriages(unittest.TestCase):
@@ -24,7 +24,7 @@ class TestStableMarriages(unittest.TestCase):
         ]
         m_to_w = [3, 5, 1, 4, 0, 2]
         assert not validate_marriages(m_to_w, m_prefs, w_prefs)
-    
+
     def test_validation_ok(self):
         """Tests that the validation function will accept stable marriage."""
         m_prefs = [
@@ -45,7 +45,7 @@ class TestStableMarriages(unittest.TestCase):
         ]
         m_to_w = [3, 5, 1, 0, 4, 2]
         assert validate_marriages(m_to_w, m_prefs, w_prefs)
-    
+
     def test_stable_3x3(self):
         """Tests that all outputs are stable for all possible 3x3 inputs."""
         possible_prefs = list(it.permutations([0, 1, 2]))
@@ -106,12 +106,12 @@ class TestStableMarriages(unittest.TestCase):
         ]
         s_to_h = [0, 2, 2, 1, 2, 0, 0, 1, 1]
         assert validate_marriages_with_capacity(s_to_h, s_prefs, h_prefs)
-    
+
 
     def test_stable_w_capacity_3x3(self):
         """
         Tests that all outputs are stable for all possible 3x3 inputs.
-        
+
         Capacity is set to 1, so we're just testing the different (general)
         implementation of the algorithm.
         """
@@ -129,6 +129,37 @@ class TestStableMarriages(unittest.TestCase):
                     stable_marriages_with_capacity(
                         m_prefs, w_prefs, capacity=1),
                         m_prefs, w_prefs)
+
+    def test_stable_roommates_basic(self):
+        """
+        Tests the stable roommates implementation on the sample data from
+        https://uvacs2102.github.io/docs/roomates.pdf
+        """
+        prefs = [
+            [3, 5, 1, 4, 2],
+            [5, 2, 4, 0, 3],
+            [3, 4, 0, 5, 1],
+            [1, 5, 4, 0, 2],
+            [3, 1, 2, 5, 0],
+            [4, 0, 3, 1, 2]
+        ]
+        assert stable_roommates(prefs) == [5, 2, 1, 4, 3, 0]
+
+    def test_stable_roommates_no_solution(self):
+        """
+        Tests the stable roommates implementation on sample data from
+        https://uvacs2102.github.io/docs/roomates.pdf
+        for which stable matching is impossible.
+        """
+        prefs = [
+            [1, 5, 3, 2, 4],
+            [2, 4, 0, 5, 3],
+            [0, 5, 1, 4, 3],
+            [4, 1, 2, 5, 0],
+            [5, 0, 2, 3, 1],
+            [3, 1, 4, 0, 2],
+        ]
+        assert stable_roommates(prefs) is None
 
 
 if __name__ == '__main__':

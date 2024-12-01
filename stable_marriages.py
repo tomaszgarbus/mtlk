@@ -4,9 +4,9 @@ from typing import Optional
 
 def _build_ranking(preferences: list[list[int]]) -> list[list[int]]:
     """Transforms the preferences for one gender into a ranking.
-    
-    If output[i][j] = k, then it means that for person `i`, the person `j` of opposite gender
-    is the k-th best choice (indexing from 0)."""
+
+    If output[i][j] = k, then it means that for person `i`, the person `j` of
+    opposite gender is the k-th best choice (indexing from 0)."""
     N = len(preferences)
     M = len(preferences[0])
     ranking = [[0 for _ in range(M)] for _ in range(N)]
@@ -17,7 +17,8 @@ def _build_ranking(preferences: list[list[int]]) -> list[list[int]]:
 
 
 def _invert(assignment: list[int]) -> list[int]:
-    """Inverts the assignment to be seen from the perspective of the other gender."""
+    """Inverts the assignment to be seen from the perspective of the other
+    gender."""
     N = len(assignment)
     inverted = [None for _ in assignment]
     for person, partner in enumerate(assignment):
@@ -32,15 +33,18 @@ def stable_marriages(
     """
     Produces a stable matching between men and women.
 
-    Stable means that there is no such pair of man M and woman W that M and W are not paired and M and W both like each
-    other more than their assigned partners.
+    Stable means that there is no such pair of man M and woman W that M and W
+    are not paired and M and W both like each other more than their assigned
+    partners.
 
-    Men and women are indexed from 0 to N. We assume equal count of men and women.
+    Men and women are indexed from 0 to N. We assume equal count of men and
+    women.
 
-    On input, men_preferences[i] is a sorted list of all N women from most preferred to least.
+    On input, men_preferences[i] is a sorted list of all N women from most
+    preferred to least.
 
-    On output, the function produces the list of matches from men's perspective. That is, output[i] is the woman
-    matched to the i-th man.
+    On output, the function produces the list of matches from men's
+    perspective. That is, output[i] is the woman matched to the i-th man.
     """
     N = len(men_preferences)
     assert len(women_preferences) == N
@@ -84,9 +88,9 @@ def validate_marriages(
     women_preferences: list[list[int]],
 ) -> bool:
     """Validates that nobody has incentive to cheat on their assigned partner.
-    
-    Doesn't validate other correctness constraints such as that everyone has exactly
-    one partner etc."""
+
+    Doesn't validate other correctness constraints such as that everyone has
+    exactly one partner etc."""
     N = len(m_to_w)
     w_to_m = _invert(m_to_w)
     men_ranking = _build_ranking(men_preferences)
@@ -108,14 +112,18 @@ def stable_marriages_with_capacity(
     capacity: int,
 ) -> list[int]:
     """
-    Produces a stable matching with capacity between medical students and hospitals.
+    Produces a stable matching with capacity between medical students and
+    hospitals.
 
-    Students are indexed from 0 to N, hospitals from 0 to M. We assume that N = M x capacity.
+    Students are indexed from 0 to N, hospitals from 0 to M. We assume that
+    N = M x capacity.
 
-    On input, student_preferences[i] is a sorted list of all M hospitals from most preferred to least.
+    On input, student_preferences[i] is a sorted list of all M hospitals from
+    most preferred to least.
 
-    On output, the function produces the list of matches from the students' perspective. That is, output[i] the
-    hospital into which i-th student got accepted.
+    On output, the function produces the list of matches from the students'
+    perspective. That is, output[i] the hospital into which i-th student got
+    accepted.
     """
     N = len(student_preferences)
     M = len(hospitals_preferences)
@@ -124,15 +132,16 @@ def stable_marriages_with_capacity(
 
     # Hospitals' ranking of students for faster lookup.
     hospitals_ranking = _build_ranking(hospitals_preferences)
-    # Students who either don't have assignment yet or lost it to another student.
+    # Students who either don't have assignment yet or lost it to another
+    # student.
     unassigned_students = [i for i in range(N)]
     # Next hospital to try for each student.
     next_hospital = [0 for _ in range(N)]
     # Student to hospital assignments.
     s_to_h = [None for _ in range(N)]
     # Hospital to student assignments.
-    # Set contains elements (-ranking, student number) so that less preferred student
-    # always lands as smallest element.
+    # Set contains elements (-ranking, student number) so that less preferred
+    # student always lands as smallest element.
     h_to_s: list[list[int, int]] = [[] for _ in range(M)]
     while unassigned_students:
         s = unassigned_students.pop()
@@ -179,12 +188,17 @@ def stable_roommates(
     """
     Produces a stable roommates matching if such exists.
 
-    Implementation of Robert Irving's algorithm: https://uvacs2102.github.io/docs/roomates.pdf
+    Implementation of Robert Irving's algorithm:
+    https://uvacs2102.github.io/docs/roomates.pdf
 
-    `preferences` on input must be exactly square i.e. len(preferences) == len(preferences[i]) for every i.
+    `preferences` on input must be almost square i.e.
+    len(preferences) == len(preferences[i]) + 1 for every i.
     """
     preferences = deepcopy(preferences)
+    # Add sentinel values.
     n = len(preferences)
+    for person in range(n):
+        preferences[person].append(person)
     next_choice_idx = [0 for _ in range(n)]
     ranking = _build_ranking(preferences)
     held_proposal = [None for _ in range(n)]
@@ -194,32 +208,106 @@ def stable_roommates(
     for person in range(n):
         suitor = person
         while suitor is not None:
-            suited = preferences[person][next_choice_idx[suitor]]
-            next_choice_idx[person] += 1
-            if held_proposal[suited] is None or ranking[suited][suitor] < ranking[suited][held_proposal[suited]]:
+            suited = preferences[suitor][next_choice_idx[suitor]]
+            next_choice_idx[suitor] += 1
+            if (
+                held_proposal[suited] is None or
+                ranking[suited][suitor] < ranking[suited][held_proposal[suited]]
+            ):
+                # print(f"{suited} holds {suitor} and rejects {held_proposal[suited]}")
                 held_proposal[suited], suitor = suitor, held_proposal[suited]
-    
-    
+            else:
+                pass
+                # print(f"{suited} rejects {suitor}")
 
+    # Check if everyone holds proposal from someone.
+    for person in range(n):
+        if held_proposal[person] is person:
+            return None
+        assert held_proposal[person] is not None
+
+    def reduce_corollary_1_3():
+        # Reduce preferences list after Phase 1:
+        # First, for all y, if y holds a proposal from x, remove all z such that
+        # y prefers z over x. (Corollary 1.3.i)
+        # Preferences mask:
+        # 0 = stays in the reduce list
+        # 1 = deleted due to corollary 1.3.i
+        # 2 = deleted due to corollary 1.3.ii
+        nonlocal preferences
+        preferences_mask = [[0 for _ in range(n)] for _ in range(n)]
+        for y in range(n):
+            x = held_proposal[y]
+            for i, z in enumerate(preferences[y]):
+                if ranking[y][z] > ranking[y][x]:
+                    preferences_mask[y][i] = 1
+                elif ranking[z][held_proposal[z]] < ranking[z][y]:
+                    preferences_mask[y][i] = 2
+        # print(preferences_mask)
+        preferences = [
+            [e[1] for e in enumerate(l[1]) if preferences_mask[l[0]][e[0]] == 0]
+            for l in enumerate(preferences)
+        ]
+        return preferences
+    preferences = reduce_corollary_1_3()
+    for i in range(n):
+        if not preferences[i]:
+            return None
+        assert held_proposal[preferences[i][0]] == i
+
+    # Second phase: more reductions.
+    def find_all_or_nothing_cycle(start: int) -> list:
+        p = [start]
+        seen = set()
+        while p[-1] not in seen:
+            seen.add(p[-1])
+            q = preferences[p[-1]][1]
+            p.append(preferences[q][-1])
+
+        return p[p.index(p[-1]) + 1:]
+
+    for person in range(n):
+        while len(preferences[person]) > 1:
+            cycle = find_all_or_nothing_cycle(person)
+            for elem in cycle:
+                held_proposal[preferences[elem][1]] = elem
+                preferences[elem] = preferences[elem][1:]
+            preferences = reduce_corollary_1_3()
+        if not preferences[person]:
+            return None
+
+    for i in range(n):
+        assert len(preferences[i]) == 1
+
+    return [p[0] for p in preferences]
 
 if __name__ == "__main__":
-    s_prefs = [
-        [0, 1, 2],
-        [2, 0, 1],
-        [2, 1, 0],
-        [1, 0, 2],
-        [2, 1, 0],
-        [0, 2, 1],
-        [0, 1, 2],
-        [1, 2, 0],
-        [0, 1, 2],
+    prefs = [
+        [3, 5, 1, 4, 2],
+        [5, 2, 4, 0, 3],
+        [3, 4, 0, 5, 1],
+        [1, 5, 4, 0, 2],
+        [3, 1, 2, 5, 0],
+        [4, 0, 3, 1, 2]
     ]
-    h_prefs = [
-        [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        [2, 5, 7, 3, 6, 8, 0, 1, 4],
-        [1, 3, 8, 2, 6, 5, 0, 7, 4],
-    ]
-    print(stable_marriages_with_capacity(
-        s_prefs, h_prefs, 3
-    ))
-    
+    print(stable_roommates(prefs))
+    # s_prefs = [
+    #     [0, 1, 2],
+    #     [2, 0, 1],
+    #     [2, 1, 0],
+    #     [1, 0, 2],
+    #     [2, 1, 0],
+    #     [0, 2, 1],
+    #     [0, 1, 2],
+    #     [1, 2, 0],
+    #     [0, 1, 2],
+    # ]
+    # h_prefs = [
+    #     [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    #     [2, 5, 7, 3, 6, 8, 0, 1, 4],
+    #     [1, 3, 8, 2, 6, 5, 0, 7, 4],
+    # ]
+    # print(stable_marriages_with_capacity(
+    #     s_prefs, h_prefs, 3
+    # ))
+
