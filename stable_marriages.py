@@ -2,7 +2,7 @@ from copy import deepcopy
 import heapq
 from typing import Optional
 
-def _build_ranking(preferences: list[list[int]]) -> list[list[int]]:
+def build_ranking(preferences: list[list[int]]) -> list[list[int]]:
     """Transforms the preferences for one gender into a ranking.
 
     If output[i][j] = k, then it means that for person `i`, the person `j` of
@@ -16,7 +16,7 @@ def _build_ranking(preferences: list[list[int]]) -> list[list[int]]:
     return ranking
 
 
-def _invert(assignment: list[int]) -> list[int]:
+def invert(assignment: list[int]) -> list[int]:
     """Inverts the assignment to be seen from the perspective of the other
     gender."""
     N = len(assignment)
@@ -50,7 +50,7 @@ def stable_marriages(
     assert len(women_preferences) == N
 
     # Build women's ranking of men for faster lookup.
-    women_ranking = _build_ranking(women_preferences)
+    women_ranking = build_ranking(women_preferences)
 
     # Next woman to propose to for each man.
     next_suited = [0 for _ in range(N)]
@@ -92,9 +92,9 @@ def validate_marriages(
     Doesn't validate other correctness constraints such as that everyone has
     exactly one partner etc."""
     N = len(m_to_w)
-    w_to_m = _invert(m_to_w)
-    men_ranking = _build_ranking(men_preferences)
-    women_ranking = _build_ranking(women_preferences)
+    w_to_m = invert(m_to_w)
+    men_ranking = build_ranking(men_preferences)
+    women_ranking = build_ranking(women_preferences)
     for m in range(N):
         for w in range(N):
             if m_to_w[m] == w:
@@ -131,7 +131,7 @@ def stable_marriages_with_capacity(
     assert N == M * capacity
 
     # Hospitals' ranking of students for faster lookup.
-    hospitals_ranking = _build_ranking(hospitals_preferences)
+    hospitals_ranking = build_ranking(hospitals_preferences)
     # Students who either don't have assignment yet or lost it to another
     # student.
     unassigned_students = [i for i in range(N)]
@@ -163,8 +163,8 @@ def validate_marriages_with_capacity(
     student_preferences: list[list[int]],
     hospitals_preferences: list[list[int]],
 ) -> bool:
-    students_ranking = _build_ranking(student_preferences)
-    hospitals_ranking = _build_ranking(hospitals_preferences)
+    students_ranking = build_ranking(student_preferences)
+    hospitals_ranking = build_ranking(hospitals_preferences)
     N = len(student_preferences)
     M = len(hospitals_preferences)
     last_accepted_s = [0 for _ in range(M)]
@@ -200,7 +200,7 @@ def stable_roommates(
     for person in range(n):
         preferences[person].append(person)
     next_choice_idx = [0 for _ in range(n)]
-    ranking = _build_ranking(preferences)
+    ranking = build_ranking(preferences)
     held_proposal = [None for _ in range(n)]
 
     # Phase 1: Reduce the list of preferences.
