@@ -17,10 +17,28 @@ def contract_edge(g: Graph, edge: Edge):
     for node in nodes:
         new_nodes.add(node_mapper(node))
     for uu, vv in edges:
-        new_edges.add((node_mapper(uu), node_mapper(vv)))
+        ee = node_mapper(uu), node_mapper(vv)
+        # Normalizing to avoid duplicate edges.
+        if ee[0] > ee[1]:
+            ee = ee[1], ee[0]
+        if ee[0] != ee[1]:
+            new_edges.add(ee)
     return new_nodes, new_edges
 
 
 def remove_edge(g: Graph, edge: Edge):
     nodes, edges = g
     return nodes, set([e for e in edges if e != edge])
+
+
+def count_colorings(g: Graph, k: int) -> int:
+    nodes, edges = g
+    if not edges:
+        return k ** len(nodes)
+    edge = min(edges)
+    return (
+        count_colorings(remove_edge(g, edge), k)
+        -
+        count_colorings(contract_edge(g, edge), k)
+    )
+
