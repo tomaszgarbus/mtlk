@@ -1,5 +1,6 @@
 import unittest
-from graph_coloring import count_colorings 
+from graph_coloring import count_colorings, find_2_coloring_if_any
+
 
 class GraphColoringTest(unittest.TestCase):
     
@@ -51,7 +52,38 @@ class GraphColoringTest(unittest.TestCase):
         )
         for t in range(15):
             self.assertEqual(count_colorings(graph, t), cp(t))
-        
+
+    def test_2_coloring_cycle_of_four(self):
+        graph = (
+            set([1, 2, 3, 4]),
+            set([
+                (1, 2), (2, 3), (3, 4), (4, 1),
+            ])
+        )
+        self.assertEqual(
+            find_2_coloring_if_any(graph),
+            {1: 0, 2: 1, 3: 0, 4: 1})
+    
+    def test_2_coloring_two_cycles__of_four(self):
+        graph = (
+            set([1, 2, 3, 4, 5, 6, 7, 8]),
+            set([
+                (1, 2), (2, 3), (3, 4), (4, 1),
+                (5, 6), (6, 7), (7, 8), (8, 5),
+            ])
+        )
+        self.assertEqual(
+            find_2_coloring_if_any(graph),
+            {1: 0, 2: 1, 3: 0, 4: 1, 5: 0, 6: 1, 7: 0, 8: 1})
+
+    def test_2_coloring_cycle_of_5(self):
+        graph = (
+            set(range(1, 6)),
+            set([(1, 2), (2, 3), (3, 4), (4, 5), (5, 1)])
+        )
+        self.assertEqual(find_2_coloring_if_any(graph), None)
+
+
 
 if __name__ == '__main__':
     unittest.main()

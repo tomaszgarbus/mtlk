@@ -1,12 +1,15 @@
 """
-Count number of good colorings in a graph using the deletion–contraction
-recurrence.
+Tools for counting and finding graph colorings.
 
 WARNING: Graphs are undirected here.
 """
+from collections import defaultdict
+
+
 # A graph is a set of nodes and a set of edges.
 type Edge = tuple[int, int]
 type Graph = tuple[set[int], set[Edge]]
+
 
 def contract_edge(g: Graph, edge: Edge):
     u, v = edge
@@ -32,6 +35,10 @@ def remove_edge(g: Graph, edge: Edge):
 
 
 def count_colorings(g: Graph, k: int) -> int:
+    """
+    Count number of good colorings in a graph using the deletion–contraction
+    recurrence.
+    """
     nodes, edges = g
     if not edges:
         return k ** len(nodes)
@@ -41,4 +48,39 @@ def count_colorings(g: Graph, k: int) -> int:
         -
         count_colorings(contract_edge(g, edge), k)
     )
+
+
+def _build_edges_dict(edges: set[Edge]) -> dict[int, list[int]]:
+    """Builds a dictionary of edges.
+
+    Keys are nodes, values are lists of connected nodes."""
+    result = defaultdict(list)
+    for u, v in edges:
+        result[u].append(v)
+        result[v].append(u)
+    return result
+
+
+def find_2_coloring_if_any(g: Graph) -> dict[int, int] | None:
+    """Returns a 2-coloring if such exists."""
+    nodes, edges = g 
+    color: dict[int, int] = {}
+    neighbors = _build_edges_dict(edges)
+    for u in nodes:
+        if u in color:
+            continue
+        q = [u]
+        color[u] = 0
+        while q:
+            v = q.pop()
+            for w in neighbors[v]:
+                if w in color:
+                    if color[w] == color[v]:
+                        # We found a cycle of odd length.
+                        return None
+                    else:
+                        continue
+                color[w] = 1 - color[v]
+                q.append(w)
+    return color
 
