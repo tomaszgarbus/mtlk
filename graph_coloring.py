@@ -4,6 +4,7 @@ Tools for counting and finding graph colorings.
 WARNING: Graphs are undirected here.
 """
 from collections import defaultdict
+from math import sqrt
 
 
 # A graph is a set of nodes and a set of edges.
@@ -84,3 +85,41 @@ def find_2_coloring_if_any(g: Graph) -> dict[int, int] | None:
                 q.append(w)
     return color
 
+
+def approximate_coloring_of_3_colorable_graph(g: Graph) -> dict[int, int]:
+    """Colors the graph `g` using at most 4*sqrt(n) colors. `g` must be
+    3-colorable."""
+    # Phase 1: handle all vertices of degree >= sqrt(n).
+    nodes, edges = g
+    neighbors = _build_edges_dict(edges)
+    n = len(nodes)
+    color: dict[int, int] = {}
+    next_color = 0
+    for v in nodes:
+        if len(neighbors[v]) > sqrt(n) and v not in color:
+            color[v], c1, c2 = next_color, next_color + 1, next_color + 2
+            next_color += 3
+            for w in neighbors[v]:
+                if w in color:
+                    continue
+                is_c1_used = False
+                for u in neighbors[w]:
+                    if u in color and color[u] == c1:
+                        is_c1_used = True
+                        break
+                color[w] = c2 if is_c1_used else c1
+
+    # Greedy phase.
+    for v in nodes:
+        if v in color:
+            continue
+        neighbor_colors = set()
+        for u in neighbors[v]:
+            if u in color:
+                neighbor_colors.add(color[u])
+        for c in range(len(neighbors[v]) + 1):
+            if c not in neighbor_colors:
+                color[v] = c
+                break
+    
+    return color

@@ -4,7 +4,7 @@ from graph_coloring import count_colorings, find_2_coloring_if_any
 
 class GraphColoringTest(unittest.TestCase):
     
-    def test_no_edges(self):
+    def test_count_colorings_no_edges(self):
         graph = (
             set([5, 9, 20, 24]),
             set()
@@ -14,7 +14,7 @@ class GraphColoringTest(unittest.TestCase):
         self.assertEqual(count_colorings(graph, 3), 81)
         self.assertEqual(count_colorings(graph, 4), 256)
 
-    def test_two_nodes_one_edge(self):
+    def test_count_colorings_two_nodes_one_edge(self):
         graph = (
             set([1, 2]),
             set([(1, 2)])
@@ -22,7 +22,7 @@ class GraphColoringTest(unittest.TestCase):
         self.assertEqual(count_colorings(graph, 1), 0)
         self.assertEqual(count_colorings(graph, 2), 2)
 
-    def test_four_nodes_fully_connected(self):
+    def test_count_colorings_four_nodes_fully_connected(self):
         graph = (
             set([1, 2, 3, 4]),
             set([
@@ -34,7 +34,7 @@ class GraphColoringTest(unittest.TestCase):
         self.assertEqual(count_colorings(graph, 4), 24)
         self.assertEqual(count_colorings(graph, 5), 120)
 
-    def test_petersen_graph(self):
+    def test_count_colorings_petersen_graph(self):
         graph = (
             set(range(1, 11)),
             set([
