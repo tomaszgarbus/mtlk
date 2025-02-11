@@ -96,7 +96,7 @@ def approximate_coloring_of_3_colorable_graph(g: Graph) -> dict[int, int]:
     color: dict[int, int] = {}
     next_color = 0
     for v in nodes:
-        if len(neighbors[v]) > sqrt(n) and v not in color:
+        if len(neighbors[v]) >= sqrt(n) and v not in color:
             color[v], c1, c2 = next_color, next_color + 1, next_color + 2
             next_color += 3
             for w in neighbors[v]:

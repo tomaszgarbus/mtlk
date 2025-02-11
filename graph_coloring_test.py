@@ -1,5 +1,23 @@
 import unittest
-from graph_coloring import count_colorings, find_2_coloring_if_any
+from math import sqrt
+from graph_coloring import (
+    Edge, Graph,
+    count_colorings, find_2_coloring_if_any,
+    approximate_coloring_of_3_colorable_graph
+    )
+
+
+def _validate_coloring(
+    g: Graph, coloring: dict[int, int], max_colors: int) -> bool:
+    nodes, edges = g
+    for edge in edges:
+        v, u = edge
+        if v not in coloring or u not in coloring:
+            return False
+        if coloring[u] == coloring[v]:
+            return False
+    distinct_colors = set(coloring.values())
+    return len(distinct_colors) <= max_colors
 
 
 class GraphColoringTest(unittest.TestCase):
@@ -83,6 +101,26 @@ class GraphColoringTest(unittest.TestCase):
         )
         self.assertEqual(find_2_coloring_if_any(graph), None)
 
+    def test_approximate_coloring_cycle_of_5(self):
+        graph = (
+            set(range(1, 6)),
+            set([(1, 2), (2, 3), (3, 4), (4, 5), (5, 1)])
+        )
+        coloring = approximate_coloring_of_3_colorable_graph(graph)
+        assert _validate_coloring(graph, coloring, 3)
+
+    def test_approximate_coloring_almost_tree(self):
+        n = 1000
+        nodes = list(range(n))
+        edges = []
+        for v in nodes:
+            for u in [v * 2 + 1, v * 2 + 2]:
+               w = u if u < n else 0
+               edges.append((v, w))
+        graph = (set(nodes), set(edges))
+        coloring = approximate_coloring_of_3_colorable_graph(graph)
+        max_colors = 4 * int(sqrt(n))
+        assert _validate_coloring(graph, coloring, max_colors)
 
 
 if __name__ == '__main__':
